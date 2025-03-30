@@ -1,8 +1,11 @@
 "use client";
 import Link from "next/link";
 import Image from 'next/image'
+import { useActiveAccount } from "thirdweb/react";
 
 export default function Home() {
+  const account = useActiveAccount();
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-white">
       {/* Hero Section */}
@@ -17,18 +20,26 @@ export default function Home() {
             Ensure your digital legacy reaches the right hands.
           </p>
           <div className="flex justify-center gap-4">
-            <Link 
-              href="/create-will" 
-              className="rounded-lg bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
-            >
-              Create Your Will
-            </Link>
-            <Link 
-              href="/learn-more" 
-              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
-            >
-              Learn More
-            </Link>
+            {account ? (
+              <>
+                <Link 
+                  href={`/create-will/${account.address}`}
+                  className="rounded-lg bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                >
+                  Create Your Will
+                </Link>
+                <Link 
+                  href={`/create-will/${account.address}`}
+                  className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+                >
+                  Get Started
+                </Link>
+              </>
+            ) : (
+              <p className="text-gray-600 font-medium">
+                Please connect your wallet to create a will
+              </p>
+            )}
           </div>
         </div>
       </div>
