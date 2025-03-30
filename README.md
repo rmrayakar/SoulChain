@@ -1,4 +1,4 @@
-# Web3.000-Hackathon
+# Web3.000-Hackathon(PDF attached above for detailed description)
 
 Please refer MultipleWillFinal.sol and MultipleWillFactoryFinal.sol in
 contracts\smartwill\contracts folder to refer deployed code of smartconract
