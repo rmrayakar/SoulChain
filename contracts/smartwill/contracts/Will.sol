@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/*
-    Interfaces for external token standards.
-*/
+
 interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
@@ -13,9 +11,7 @@ interface IERC721 {
     function safeTransferFrom(address from, address to, uint256 tokenId) external;
 }
 
-/*
-    Minimal soul-bound token (SBT) implementation.
-*/
+
 contract SoulBoundToken {
     string public name = "WillSBT";
     string public symbol = "WILL";
@@ -34,9 +30,7 @@ contract SoulBoundToken {
     }
 }
 
-/*
-    Main DigitalWill contract – supports multiple beneficiaries and both on-chain and off-chain assets.
-*/
+
 contract DigitalWill is SoulBoundToken {
     
     enum AssetType { ETH, ERC20, ERC721, OffChain }
@@ -87,11 +81,7 @@ contract DigitalWill is SoulBoundToken {
         oracle = _oracle;
     }
     
-    /*
-       Optimized createWill function:
-       - Combines validation and insertion for beneficiaries.
-       - Combines asset validation and processing.
-    */
+    
     function createWill(
         address[] calldata _beneficiaries,
         uint256[] calldata _shares,
@@ -108,7 +98,7 @@ contract DigitalWill is SoulBoundToken {
         newWill.deathVerified = false;
         newWill.assetsTransferred = false;
 
-        // Combine loop: Validate each beneficiary and add to the will
+        
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             require(_beneficiaries[i] != address(0), "Invalid beneficiary address");
             totalShares += _shares[i];
@@ -116,13 +106,13 @@ contract DigitalWill is SoulBoundToken {
         }
         require(totalShares == 100000, "Total shares must sum to 100000 (100%)");
 
-        // Combine loop for assets: Validate and process each asset
+       
         for (uint i = 0; i < _assets.length; i++) {
             Asset memory asset = _assets[i];
             if (asset.assetType == AssetType.ETH) {
-                // For ETH, check that sufficient ETH is sent.
+                
                 require(msg.value >= asset.amount, "Insufficient ETH sent");
-                // ETH is held in the contract.
+                
             } else if (asset.assetType == AssetType.ERC20 || asset.assetType == AssetType.ERC721) {
                 require(asset.tokenAddress != address(0), "Invalid token address");
                 if (asset.assetType == AssetType.ERC20) {
@@ -132,7 +122,7 @@ contract DigitalWill is SoulBoundToken {
                     IERC721(asset.tokenAddress).safeTransferFrom(msg.sender, address(this), asset.tokenId);
                 }
             }
-            // For OffChain assets, just store the asset (metadataURI holds off-chain data).
+            
             newWill.assets.push(asset);
         }
         
@@ -154,7 +144,7 @@ contract DigitalWill is SoulBoundToken {
         require(userWill.deathVerified, "Death not verified");
         require(!userWill.assetsTransferred, "Assets already transferred");
         
-        // Check that caller is a beneficiary and get their share.
+        
         bool isBeneficiary = false;
         uint256 callerShare;
         for (uint256 i = 0; i < userWill.beneficiaries.length; i++) {
@@ -166,7 +156,7 @@ contract DigitalWill is SoulBoundToken {
         }
         require(isBeneficiary, "Caller is not a beneficiary");
         
-        // Process each asset.
+        
         for (uint i = 0; i < userWill.assets.length; i++) {
             Asset memory asset = userWill.assets[i];
             if (asset.assetType == AssetType.ETH) {

@@ -60,13 +60,13 @@ contract DigitalWill is SoulBoundToken {
         bool assetsTransferred;
         Oracle[] deathOracles;
         uint256 deathApprovalCount;
-        uint256 deathApprovalThreshold; // Majority threshold = (n / 2) + 1
-        uint256 ethDeposited; // Total ETH deposited specifically for this will.
+        uint256 deathApprovalThreshold; 
+        uint256 ethDeposited; 
     }
 
     mapping(uint256 => Will) public wills;
     mapping(address => uint256[]) public ownerWills;
-    // Mapping for death approvals.
+   
     mapping(uint256 => mapping(address => bool)) public deathApprovals;
 
     uint256 public willCounter;
@@ -80,7 +80,7 @@ contract DigitalWill is SoulBoundToken {
     event OffChainAssetClaim(uint256 indexed willId, address beneficiary, string metadataURI);
     event WillRevoked(address indexed owner, uint256 indexed willId);
 
-    // New event for modifications.
+    
     event WillModified(address indexed owner, uint256 indexed willId);
 
     modifier onlyAdmin() {
@@ -113,14 +113,14 @@ contract DigitalWill is SoulBoundToken {
         willCounter++;
         uint256 newWillId = willCounter;
 
-        // Initialize the will.
+       
         Will storage newWill = wills[newWillId];
         newWill.id = newWillId;
         newWill.owner = msg.sender;
         newWill.deathVerified = false;
         newWill.assetsTransferred = false;
 
-        // Add beneficiaries and validate shares.
+        
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             require(_beneficiaries[i] != address(0), "Invalid beneficiary address");
             totalShares += _shares[i];
@@ -128,16 +128,16 @@ contract DigitalWill is SoulBoundToken {
         }
         require(totalShares == 100000, "Total shares must sum to 100000 (100%)");
 
-        // Set oracle addresses with Aadhaar numbers.
+        
         for (uint256 i = 0; i < _oracles.length; i++) {
             require(_oracles[i] != address(0), "Invalid oracle address");
             require(bytes(_aadhaarNumbers[i]).length > 0, "Empty Aadhaar number");
             newWill.deathOracles.push(Oracle(_oracles[i], _aadhaarNumbers[i]));
         }
-        // Set majority threshold (floor(n/2)+1).
+       
         newWill.deathApprovalThreshold = (newWill.deathOracles.length / 2) + 1;
 
-        // Process assets.
+    
         uint256 totalETHRequired = 0;
         for (uint i = 0; i < _assets.length; i++) {
             Asset memory asset = _assets[i];
@@ -146,24 +146,18 @@ contract DigitalWill is SoulBoundToken {
             }
             newWill.assets.push(asset);
         }
-        // Verify that the sender has sent enough ETH for the declared ETH assets.
+        
         require(msg.value >= totalETHRequired, "Insufficient ETH sent");
         newWill.ethDeposited = totalETHRequired;
 
-        // Track the will for the owner.
+        
         ownerWills[msg.sender].push(newWillId);
         mint(msg.sender);
         emit WillCreated(msg.sender, newWillId);
         return newWillId;
     }
 
-    /*
-       Allows the owner to modify an existing will provided death has not been verified
-       and no oracle approvals have been recorded.
-       It updates the beneficiaries, assets, and oracle details.
-       For ETH assets, if the new total required differs from the previously deposited ETH,
-       additional funds must be provided or the excess will be refunded.
-    */
+    
     function modifyWill(
         uint256 _willId,
         address[] calldata _beneficiaries,
@@ -183,12 +177,12 @@ contract DigitalWill is SoulBoundToken {
         require(_oracles.length > 0, "At least one oracle required");
         require(_oracles.length == _aadhaarNumbers.length, "Oracle and Aadhaar count mismatch");
 
-        // Reset existing beneficiaries, assets, and oracle lists.
+        
         delete userWill.beneficiaries;
         delete userWill.assets;
         delete userWill.deathOracles;
 
-        // Add new beneficiaries and validate shares.
+        
         uint256 totalShares = 0;
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             require(_beneficiaries[i] != address(0), "Invalid beneficiary address");
@@ -197,17 +191,17 @@ contract DigitalWill is SoulBoundToken {
         }
         require(totalShares == 100000, "Total shares must sum to 100000 (100%)");
 
-        // Add new oracles.
+        
         for (uint256 i = 0; i < _oracles.length; i++) {
             require(_oracles[i] != address(0), "Invalid oracle address");
             require(bytes(_aadhaarNumbers[i]).length > 0, "Empty Aadhaar number");
             userWill.deathOracles.push(Oracle(_oracles[i], _aadhaarNumbers[i]));
         }
-        // Reset the oracle approval count and threshold.
+        
         userWill.deathApprovalCount = 0;
         userWill.deathApprovalThreshold = (userWill.deathOracles.length / 2) + 1;
 
-        // Handle ETH assets deposit adjustment.
+        
         uint256 newTotalETHRequired = 0;
         for (uint i = 0; i < _assets.length; i++) {
             Asset memory asset = _assets[i];
@@ -217,18 +211,18 @@ contract DigitalWill is SoulBoundToken {
             userWill.assets.push(asset);
         }
 
-        // If new ETH requirement is higher than current deposit, require extra funds.
+        
         if (newTotalETHRequired > userWill.ethDeposited) {
             require(msg.value == (newTotalETHRequired - userWill.ethDeposited), "Additional ETH required");
             userWill.ethDeposited = newTotalETHRequired;
         }
-        // If new ETH requirement is lower, refund the difference.
+        
         else if (newTotalETHRequired < userWill.ethDeposited) {
             uint256 refundAmount = userWill.ethDeposited - newTotalETHRequired;
             userWill.ethDeposited = newTotalETHRequired;
             payable(msg.sender).transfer(refundAmount);
         }
-        // If equal, nothing extra needs to be done.
+        
 
         emit WillModified(msg.sender, _willId);
     }
@@ -251,13 +245,12 @@ contract DigitalWill is SoulBoundToken {
         }
         require(isDesignatedOracle, "Caller is not a designated oracle");
 
-        // Ensure this oracle hasn't already approved.
         require(!deathApprovals[_willId][msg.sender], "Oracle already approved");
         deathApprovals[_willId][msg.sender] = true;
         userWill.deathApprovalCount++;
         emit OracleApprovalReceived(_willId, msg.sender);
 
-        // If approvals meet the threshold, mark death as verified and distribute assets.
+        
         if (userWill.deathApprovalCount >= userWill.deathApprovalThreshold) {
             userWill.deathVerified = true;
             emit DeathVerified(_willId);

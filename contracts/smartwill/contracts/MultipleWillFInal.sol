@@ -217,10 +217,10 @@ contract DigitalWill is SoulBoundToken {
         for (uint i = 0; i < userWill.assets.length; i++) {
             Asset memory asset = userWill.assets[i];
             if (asset.assetType == AssetType.ETH) {
-                // Use the ETH deposited specifically for this will.
+                
                 uint256 availableETH = userWill.ethDeposited;
                 require(availableETH > 0, "No ETH available for distribution");
-                // Distribute ETH according to shares.
+                
                 for (uint256 j = 0; j < userWill.beneficiaries.length; j++) {
                     uint256 allocatedETH = (availableETH * userWill.beneficiaries[j].share) / 100000;
                     if (allocatedETH > 0) {
@@ -238,11 +238,11 @@ contract DigitalWill is SoulBoundToken {
                     }
                 }
             } else if (asset.assetType == AssetType.ERC721) {
-                // ERC721 tokens must be transferred to the sole beneficiary.
+                
                 require(userWill.beneficiaries.length == 1 && userWill.beneficiaries[0].share == 100000, "ERC721 tokens require sole beneficiary");
                 IERC721(asset.tokenAddress).safeTransferFrom(address(this), userWill.beneficiaries[0].wallet, asset.tokenId);
             } else if (asset.assetType == AssetType.OffChain) {
-                // Emit event for off-chain asset claim for each beneficiary.
+                
                 for (uint256 j = 0; j < userWill.beneficiaries.length; j++) {
                     emit OffChainAssetClaim(_willId, userWill.beneficiaries[j].wallet, asset.metadataURI);
                 }
@@ -264,7 +264,7 @@ contract DigitalWill is SoulBoundToken {
         for (uint i = 0; i < userWill.assets.length; i++) {
             Asset memory asset = userWill.assets[i];
             if (asset.assetType == AssetType.ETH) {
-                // Return ETH only if available in contract balance and tied to this will deposit.
+                
                 uint256 availableETH = address(this).balance;
                 require(availableETH >= asset.amount, "Not enough ETH in contract");
                 payable(msg.sender).transfer(asset.amount);
@@ -280,9 +280,9 @@ contract DigitalWill is SoulBoundToken {
             }
         }
         
-        // Remove the will by deleting from storage.
+       
         delete wills[_willId];
-        // Optionally, remove _willId from the ownerWills mapping (left as an exercise).
+       
         emit WillRevoked(msg.sender, _willId);
     }
     
@@ -291,7 +291,7 @@ contract DigitalWill is SoulBoundToken {
         admin = _newAdmin;
     }
     
-    // View functions to read oracle information.
+   
     function getWillOracles(uint256 _willId) external view returns (Oracle[] memory) {
         Will storage userWill = wills[_willId];
         require(userWill.owner != address(0), "Will does not exist");

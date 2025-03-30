@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./MultipleWill2.sol"; // Assumes DigitalWill is in the same project
+import "./MultipleWill2.sol"; 
 
 contract DigitalWillFactory {
-    // Array to store addresses of deployed DigitalWill instances
+    
     address payable[] public deployedDigitalWills;
     
     event DigitalWillDeployed(address indexed deployer, address digitalWillAddress);
