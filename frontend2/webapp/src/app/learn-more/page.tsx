@@ -99,7 +99,7 @@ export default function LearnMore() {
                                     <div className="pl-6 border-l-2 border-purple-200">
                                         <ul className="space-y-4 text-gray-600">
                                             <li>Connect your MetaMask wallet</li>
-                                            <li>Navigate to "Create Will" section</li>
+                                            <li>Navigate to &quot;Create Will&quot; section</li>
                                             <li>Add beneficiary addresses and their shares</li>
                                             <li>Specify assets to be included</li>
                                             <li>Add trusted oracles with their details</li>
@@ -122,7 +122,7 @@ export default function LearnMore() {
                                     <h3 className="text-xl font-semibold text-gray-900 mb-4">3. Managing Wills</h3>
                                     <div className="pl-6 border-l-2 border-purple-200">
                                         <ul className="space-y-4 text-gray-600">
-                                            <li>View all wills in "My Wills" section</li>
+                                            <li>View all wills in &quot;My Wills&quot; section</li>
                                             <li>Track oracle verification status</li>
                                             <li>Revoke wills if needed</li>
                                         </ul>
