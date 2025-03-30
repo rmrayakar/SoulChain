@@ -58,13 +58,13 @@ contract DigitalWill is SoulBoundToken {
         uint256 share;   // Share in basis points (total must equal 100000).
     }
     
-    // Add Aadhaar number mapping
+    
     struct Oracle {
         address wallet;
         string aadhaarNumber;
     }
     
-    // Note: Nested mappings require the will to be stored in contract storage.
+    
     struct Will {
         uint256 id;
         address owner;
@@ -72,18 +72,18 @@ contract DigitalWill is SoulBoundToken {
         Asset[] assets;
         bool deathVerified;
         bool assetsTransferred;
-        Oracle[] deathOracles;   // Changed to Oracle struct array
+        Oracle[] deathOracles;  
         uint256 deathApprovalCount;
-        uint256 deathApprovalThreshold; // Majority threshold = (n / 2) + 1
-        // ETH deposited specifically for this will (if any) is the sum of all ETH assets declared.
+        uint256 deathApprovalThreshold; 
+       
         uint256 ethDeposited;
     }
     
-    // Mapping from will ID to Will.
+    
     mapping(uint256 => Will) public wills;
-    // Mapping from owner address to a list of their will IDs.
+    
     mapping(address => uint256[]) public ownerWills;
-    // Mapping for death approvals moved out of the Will struct for gas optimization.
+    
     mapping(uint256 => mapping(address => bool)) public deathApprovals;
     
     uint256 public willCounter;
@@ -127,14 +127,14 @@ contract DigitalWill is SoulBoundToken {
         willCounter++;
         uint256 newWillId = willCounter;
         
-        // Initialize the will.
+        
         Will storage newWill = wills[newWillId];
         newWill.id = newWillId;
         newWill.owner = msg.sender;
         newWill.deathVerified = false;
         newWill.assetsTransferred = false;
         
-        // Add beneficiaries and validate shares.
+        
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             require(_beneficiaries[i] != address(0), "Invalid beneficiary address");
             totalShares += _shares[i];
@@ -142,30 +142,30 @@ contract DigitalWill is SoulBoundToken {
         }
         require(totalShares == 100000, "Total shares must sum to 100000 (100%)");
 
-        // Set oracle addresses with Aadhaar numbers.
+        
         for (uint256 i = 0; i < _oracles.length; i++) {
             require(_oracles[i] != address(0), "Invalid oracle address");
             require(bytes(_aadhaarNumbers[i]).length > 0, "Empty Aadhaar number");
             newWill.deathOracles.push(Oracle(_oracles[i], _aadhaarNumbers[i]));
         }
-        // Set majority threshold (floor(n/2)+1).
+       
         newWill.deathApprovalThreshold = (newWill.deathOracles.length / 2) + 1;
         
-        // Process assets.
+        
         uint256 totalETHRequired = 0;
         for (uint i = 0; i < _assets.length; i++) {
             Asset memory asset = _assets[i];
             if (asset.assetType == AssetType.ETH) {
-                // Sum total ETH required for this will.
+               
                 totalETHRequired += asset.amount;
             }
             newWill.assets.push(asset);
         }
-        // Verify that the sender has sent enough ETH for the declared ETH assets.
+      
         require(msg.value >= totalETHRequired, "Insufficient ETH sent");
         newWill.ethDeposited = totalETHRequired;
         
-        // Track the will for the owner.
+       
         ownerWills[msg.sender].push(newWillId);
         mint(msg.sender);
         emit WillCreated(msg.sender, newWillId);
@@ -190,13 +190,13 @@ contract DigitalWill is SoulBoundToken {
         }
         require(isDesignatedOracle, "Caller is not a designated oracle");
         
-        // Ensure this oracle hasn't already approved.
+        
         require(!deathApprovals[_willId][msg.sender], "Oracle already approved");
         deathApprovals[_willId][msg.sender] = true;
         userWill.deathApprovalCount++;
         emit OracleApprovalReceived(_willId, msg.sender);
         
-        // If approvals meet the threshold, mark death as verified and distribute assets.
+        
         if (userWill.deathApprovalCount >= userWill.deathApprovalThreshold) {
             userWill.deathVerified = true;
             emit DeathVerified(_willId);
@@ -274,7 +274,7 @@ contract DigitalWill is SoulBoundToken {
                 bool success = IERC20(asset.tokenAddress).transfer(msg.sender, asset.amount);
                 require(success, "ERC20 transfer failed");
             } else if (asset.assetType == AssetType.ERC721) {
-                // Check if contract still owns the token before transferring it back.
+                
                 require(IERC721(asset.tokenAddress).ownerOf(asset.tokenId) == address(this), "Contract not owner of ERC721");
                 IERC721(asset.tokenAddress).safeTransferFrom(address(this), msg.sender, asset.tokenId);
             }
