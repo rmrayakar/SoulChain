@@ -1,10 +1,6 @@
 'use client';
-import { useState, useEffect } from "react";
-import { useActiveAccount, useReadContract, useSendTransaction } from "thirdweb/react";
-import { client } from "@/app/client";
-import { sepolia } from "thirdweb/chains";
-import { getContract, prepareContractCall } from "thirdweb";
-import { SMART_WILL_FACTORY } from "@/app/constants/contracts";
+import { useState } from "react";
+import { useActiveAccount } from "thirdweb/react";
 
 interface Oracle {
     wallet: string;
@@ -12,74 +8,36 @@ interface Oracle {
     hasApproved: boolean;
 }
 
+// Test data
+const TEST_ORACLES = [
+    {
+        wallet: "0x3456789012345678901234567890123456789012",
+        aadhaarNumber: "XXXX-XXXX-1234",
+        hasApproved: false
+    },
+    {
+        wallet: "0x4567890123456789012345678901234567890123",
+        aadhaarNumber: "XXXX-XXXX-5678",
+        hasApproved: true
+    },
+    {
+        wallet: "0x5678901234567890123456789012345678901234",
+        aadhaarNumber: "XXXX-XXXX-9012",
+        hasApproved: false
+    }
+];
+
 export default function VerifyDeath({ params }: { params: { address: string } }) {
     const account = useActiveAccount();
-    const [isLoading, setIsLoading] = useState(true);
-    const [oracles, setOracles] = useState<Oracle[]>([]);
-    const { mutate: sendTransaction } = useSendTransaction();
-
-    const factoryContract = getContract({
-        client: client,
-        chain: sepolia,
-        address: SMART_WILL_FACTORY,
-    });
-
-    // Get will details
-    const { data: willDetails } = useReadContract({
-        contract: factoryContract,
-        method: "function getWillOraclesFromDigitalWill(address digitalWillAddress, uint256 willId) view returns ((address wallet, string aadhaarNumber)[])",
-        params: [params.address, BigInt(0)] // willId is always 0 in this case
-    });
-
-    // Get oracle approval status
-    const { data: oracleCount } = useReadContract({
-        contract: factoryContract,
-        method: "function getOracleCountFromDigitalWill(address digitalWillAddress, uint256 willId) view returns (uint256)",
-        params: [params.address, BigInt(0)]
-    });
-
-    useEffect(() => {
-        const fetchOracleDetails = async () => {
-            if (oracleCount && willDetails) {
-                const count = Number(oracleCount);
-                const oracleDetails = [];
-
-                for (let i = 0; i < count; i++) {
-                    const { data: oracle } = await useReadContract({
-                        contract: factoryContract,
-                        method: "function getOracleDetailsFromDigitalWill(address digitalWillAddress, uint256 willId, uint256 oracleIndex) view returns (address wallet, string aadhaarNumber, bool hasApproved)",
-                        params: [params.address, BigInt(0), BigInt(i)]
-                    });
-
-                    if (oracle) {
-                        oracleDetails.push({
-                            wallet: oracle[0],
-                            aadhaarNumber: oracle[1],
-                            hasApproved: oracle[2]
-                        });
-                    }
-                }
-
-                setOracles([...oracleDetails]);
-                setIsLoading(false);
-            }
-        };
-
-        fetchOracleDetails();
-    }, [oracleCount, willDetails, params.address, factoryContract]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleVerifyDeath = async () => {
         try {
-            const transaction = prepareContractCall({
-                contract: factoryContract,
-                method: "function verifyDeathViaFactory(address digitalWillAddress, uint256 willId)",
-                params: [params.address, BigInt(0)],
-            });
-            await sendTransaction(transaction);
-            alert("Death verification submitted successfully!");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            alert("Death verification simulated successfully!");
         } catch (error) {
-            console.error("Error verifying death:", error);
-            alert("Failed to verify death. Check console for details.");
+            console.error("Error:", error);
+            alert("Verification simulation failed");
         }
     };
 
@@ -102,7 +60,7 @@ export default function VerifyDeath({ params }: { params: { address: string } })
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                                 <h2 className="text-xl font-semibold mb-4">Oracle Details</h2>
                                 <div className="space-y-4">
-                                    {oracles.map((oracle, index) => (
+                                    {TEST_ORACLES.map((oracle, index) => (
                                         <div key={index} className="p-4 border rounded-lg">
                                             <p className="text-sm text-gray-600">
                                                 <span className="font-medium">Wallet:</span>{' '}
@@ -121,7 +79,7 @@ export default function VerifyDeath({ params }: { params: { address: string } })
                                 </div>
                             </div>
 
-                            {account && oracles.some(o => o.wallet === account.address) && !oracles.find(o => o.wallet === account.address)?.hasApproved && (
+                            {account && TEST_ORACLES.some(o => o.wallet === account.address) && !TEST_ORACLES.find(o => o.wallet === account.address)?.hasApproved && (
                                 <button
                                     onClick={handleVerifyDeath}
                                     className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
@@ -131,6 +89,14 @@ export default function VerifyDeath({ params }: { params: { address: string } })
                             )}
                         </div>
                     )}
+
+                    <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-700">
+                            <strong>Note:</strong> This is test data being displayed for demonstration purposes. 
+                            Due to reaching the limit of Thirdweb's free tier for contract deployments, 
+                            we are unable to show live contract data at this time.
+                        </p>
+                    </div>
                 </div>
             </div>
         </main>

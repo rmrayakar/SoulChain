@@ -369,9 +369,4 @@ contract DigitalWill is SoulBoundToken {
         );
     }
     
-    function getWillDetails(uint256 _willId) external view returns (
-        Beneficiary[] memory,
-        Asset[] memory,
-        Oracle[] memory,
-        bool,
-        bool,
+}
