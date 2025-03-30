@@ -40,6 +40,12 @@ export default function Home() {
                 Please connect your wallet to create a will
               </p>
             )}
+            <Link 
+              href="/learn-more" 
+              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+            >
+              Learn More
+            </Link>
           </div>
         </div>
       </div>
