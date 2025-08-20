@@ -1,4 +1,4 @@
-# Web3.000-Hackathon(PDF attached above for detailed description)
+# Web3.00-Hackathon(PDF attached above for detailed description)
 
 Please refer MultipleWillFinal.sol and MultipleWillFactoryFinal.sol in
 contracts\smartwill\contracts folder to refer deployed code of smartconract
@@ -63,6 +63,6 @@ https://thirdweb.com/sepolia/0x1c4b380D59Fe3a35E5E47E3E87854ba2aD936814/explorer
 
 ## 🌟 Join the Future of Digital Wills!
 
-Smart Will redefines how inheritance works, making it **seamless, transparent, and tamper-proof**. Say goodbye to legal hassles and **secure your legacy with blockchain**! 🚀  
+Smart Will redefines how inheritance works, making it **seamless, transparent, and tamper-proof**. Say goodbye to legal hassles and  **secure your legacy with blockchain**! 🚀  
 
 ⚡ **Try Smart Will now and shape the future of digital inheritance!** ⚡
